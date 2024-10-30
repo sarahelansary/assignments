@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.io.File;
+import java.util.Arrays;
 
 
 public class CommandLineInterpreter {
@@ -46,11 +47,11 @@ private CD cd;
             case "help":
                 help.displayHelp();
             case ">>":
-                // Ensure args contains both filename and content
+                // Ensure correct usage: ">> filename content[]"
                 if (args.length >= 2) {
-                    String filename = args[0]; // First argument as filename
-                    String content = args[1];  // Second argument as content
-                    redirectToFile.redirectToFile(filename, content);
+                    String filename = args[0];
+                    String[] contentArray = Arrays.copyOfRange(args, 1, args.length);
+                    redirectToFile.redirectToFile(filename, contentArray);
                 } else {
                     System.out.println("Error: Missing filename or content for redirection.");
                 }

@@ -1,11 +1,12 @@
-import org.example.CD;
+package os.example;
+
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.File;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.PrintStream;
 import java.nio.file.Files;
 

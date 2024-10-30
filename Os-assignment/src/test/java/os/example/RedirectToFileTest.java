@@ -1,26 +1,28 @@
-package org.example;
+package os.example;
 import org.junit.jupiter.api.*;
+import os.example.redirectToFile;
+
 import java.io.*;
 import java.nio.file.*;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class cliTest {
+class RedirectToFileTest {
 
- private cli cliex;
+ private redirectToFile cliex;
 
  @BeforeEach
  void setUp() {
-  cliex = new cli();
+  cliex = new redirectToFile();
  }
 
 
  @Test
- void testRedirectToFile() {
+ void testredirectToFile() {
   String testFilename = "testOutput.txt";
-  String content = "Hello, World!";
-  cliex.redirectToFile(content, testFilename);
+  String content = "Hello";
+  cliex.redirectToFile(testFilename,new String[]{content});
 
   try {
    String fileContent = new String(Files.readAllBytes(Paths.get(testFilename)));
