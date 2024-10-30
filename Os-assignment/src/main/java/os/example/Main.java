@@ -8,8 +8,7 @@ public class Main {
         Scanner scanner = new Scanner(System.in);
 
         while (true) {
-            String currnentDir=System.getProperty("user.dir");
-            System.out.print("cli>"+currentDir+">");
+            System.out.print("cli> ");
 
             // Check if there's a next line to read
             if (!scanner.hasNextLine()) {
