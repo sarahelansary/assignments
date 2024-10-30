@@ -13,6 +13,8 @@ remove remove=new remove();
 move move= new move();
 Redirection Redirection =new Redirection();
 merge merge= new merge();
+DisplayHelp help= new DisplayHelp();
+redirectToFile  redirectToFile=new redirectToFile();pipe pipe=new pipe();
     public void executeCommand(String command, String[] args) {
         switch (command) {
             case "cat":
@@ -29,6 +31,20 @@ merge merge= new merge();
                 break;
             case"mv" :
                 move.move(args);
+                break;
+            case "help":
+                help.displayHelp();
+            case ">>":
+                // Ensure args contains both filename and content
+                if (args.length >= 2) {
+                    String filename = args[0]; // First argument as filename
+                    String content = args[1];  // Second argument as content
+                    redirectToFile.redirectToFile(filename, content);
+                } else {
+                    System.out.println("Error: Missing filename or content for redirection.");
+                }
+                break;
+            case"|":
                 break;
 
             default:
