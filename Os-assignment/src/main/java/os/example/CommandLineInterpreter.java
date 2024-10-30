@@ -5,9 +5,11 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.io.File;
 
 
 public class CommandLineInterpreter {
+private File currentDirectory;
 cat cat=new cat();
 remove remove=new remove();
 move move= new move();
@@ -15,6 +17,8 @@ Redirection Redirection =new Redirection();
 merge merge= new merge();
 DisplayHelp help= new DisplayHelp();
 redirectToFile  redirectToFile=new redirectToFile();pipe pipe=new pipe();
+ls list=new ls();
+private CD cd; 
     public void executeCommand(String command, String[] args) {
         switch (command) {
             case "cat":
@@ -31,6 +35,13 @@ redirectToFile  redirectToFile=new redirectToFile();pipe pipe=new pipe();
                 break;
             case"mv" :
                 move.move(args);
+                break;
+            case "ls":
+                list.ls(args,currentDirectory);
+                break;
+            case "cd":
+                cd.cd(args);
+                currentDirectory = cd.getCurrentDirectory();
                 break;
             case "help":
                 help.displayHelp();
