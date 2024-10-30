@@ -1,4 +1,4 @@
-package org.example;
+package os.example;
 import java.io.File;
 
 public class CD {
