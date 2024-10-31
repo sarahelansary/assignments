@@ -10,7 +10,7 @@ public class pipe {
         List<String> output = new ArrayList<>();
         if (command.equals("grep")) {
             for (String line : input) {
-                if (line.contains("txt")) {
+                if (line.contains('.'+text)) {
                     output.add(line);
                 }
             }

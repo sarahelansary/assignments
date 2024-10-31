@@ -11,7 +11,7 @@ public class cat {
     public void handleCatCommand(String[] args) {
         if (args.length == 0) {
             // No file specified: read from standard input until end of input
-            System.out.println("Reading from standard input.  Ctrl+Z (Windows) and Enter to end.");
+            System.out.println("Reading from standard input.  Ctrl+D and Enter to end.");
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(System.in))) {
                 String line;
                 while ((line = reader.readLine()) != null) {
