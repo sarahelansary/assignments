@@ -1,81 +1,77 @@
 package os.example;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.nio.file.Files;
+import java.nio.file.Path;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class MkdirTest {
-    private File testDirectory;
+
     private mkdir mkdirCommand;
+    private final ByteArrayOutputStream outputStreamCaptor = new ByteArrayOutputStream();
+    private Path tempDir;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
-        testDirectory = Files.createTempDirectory("testDir").toFile();
         mkdirCommand = new mkdir();
-    }
+        System.setOut(new PrintStream(outputStreamCaptor));
 
-    @After
-    public void tearDown() throws Exception {
-        Files.walk(testDirectory.toPath())
-                .sorted((a, b) -> b.compareTo(a))
-                .forEach(path -> {
-                    try {
-                        Files.delete(path);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                });
+        // Create a temporary directory for tests
+        tempDir = Files.createTempDirectory("testDir");
     }
 
     @Test
     public void testCreateDirectory() {
-        // Capture the output of the mkdir command
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        System.setOut(new PrintStream(outputStream));
+        String dirName = tempDir.resolve("testDir").toString();
 
-        mkdirCommand.execute(new String[]{"newDir"});
-        File newDir = new File(testDirectory, "newDir");
+        // Clean up before the test
+        new File(dirName).delete();
 
-        // Verify the directory was created
-        assertTrue(newDir.exists());
-        String output = outputStream.toString().trim();
-        assertEquals("Directory created: newDir", output);
+        mkdirCommand.execute(new String[]{dirName});
+
+        // Print captured output for debugging
+        String actualOutput = outputStreamCaptor.toString().trim();
+        System.out.println("Captured output: " + actualOutput);
+
+        assertTrue(new File(dirName).exists(), "Directory should be created");
+        assertEquals("Directory created: " + dirName, actualOutput, "Output mismatch");
     }
 
     @Test
-    public void testCreateDirectoryAlreadyExists() {
-        // Create the directory first
-        new File(testDirectory, "existingDir").mkdir();
+    public void testCreateExistingDirectory() {
+        String dirName = tempDir.resolve("existingDir").toString();
 
-        // Capture the output
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        System.setOut(new PrintStream(outputStream));
+        // Create the directory for the test
+        new File(dirName).mkdir();
 
-        mkdirCommand.execute(new String[]{"existingDir"});
+        mkdirCommand.execute(new String[]{dirName});
 
-        // Verify the output message
-        String output = outputStream.toString().trim();
-        assertEquals("File already exists: existingDir", output);
+        // Print captured output for debugging
+        String actualOutput = outputStreamCaptor.toString().trim();
+        System.out.println("Captured output: " + actualOutput);
+
+        assertEquals("mkdir: failed to create directory: " + dirName, actualOutput, "Output mismatch");
+
+        // Clean up after the test
+        new File(dirName).delete();
     }
 
     @Test
-    public void testCreateDirectoryNoArgument() {
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        System.setOut(new PrintStream(outputStream));
-
+    public void testMissingArgument() {
         mkdirCommand.execute(new String[]{});
 
-        // Verify the output message
-        String output = outputStream.toString().trim();
-        assertEquals("mkdir: missing argument", output);
+        // Print captured output for debugging
+        String actualOutput = outputStreamCaptor.toString().trim();
+        System.out.println("Captured output: " + actualOutput);
+
+        assertEquals("mkdir: missing argument", actualOutput, "Output mismatch");
     }
 }
+
 

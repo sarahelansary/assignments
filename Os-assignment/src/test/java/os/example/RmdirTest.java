@@ -1,83 +1,80 @@
 package os.example;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.file.Files;
+import java.nio.file.Path;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class RmdirTest {
-    private File testDirectory;
+
     private rmdir rmdirCommand;
+    private final ByteArrayOutputStream outputStreamCaptor = new ByteArrayOutputStream();
+    private Path tempDir;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
-        testDirectory = Files.createTempDirectory("testDir").toFile();
         rmdirCommand = new rmdir();
-        new File(testDirectory, "testDir").mkdir(); // Create a directory for testing
-    }
+        System.setOut(new PrintStream(outputStreamCaptor));
 
-    @After
-    public void tearDown() throws Exception {
-        Files.walk(testDirectory.toPath())
-                .sorted((a, b) -> b.compareTo(a))
-                .forEach(path -> {
-                    try {
-                        Files.delete(path);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                });
+        // Create a temporary directory for tests
+        tempDir = Files.createTempDirectory("testDir");
     }
 
     @Test
     public void testRemoveDirectory() {
-        // Capture the output
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        System.setOut(new PrintStream(outputStream));
+        String dirName = tempDir.resolve("removableDir").toString();
+        new File(dirName).mkdir();  // Create the directory to be removed
 
-        rmdirCommand.execute(new String[]{"testDir"});
+        rmdirCommand.execute(new String[]{dirName});
 
-        // Verify the directory was removed
-        File removedDir = new File(testDirectory, "testDir");
-        assertTrue(!removedDir.exists());
-        String output = outputStream.toString().trim();
-        assertEquals("Directory removed: testDir", output);
+        String actualOutput = outputStreamCaptor.toString().trim();
+        System.out.println("Captured output: " + actualOutput);
+
+        assertFalse(new File(dirName).exists(), "Directory should be removed");
+        assertEquals("Directory removed: " + dirName, actualOutput, "Output mismatch");
     }
 
     @Test
     public void testRemoveNonExistentDirectory() {
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        System.setOut(new PrintStream(outputStream));
+        String dirName = tempDir.resolve("nonExistentDir").toString();
 
-        rmdirCommand.execute(new String[]{"nonExistentDir"});
+        rmdirCommand.execute(new String[]{dirName});
 
-        // Verify the output message
-        String output = outputStream.toString().trim();
-        assertEquals("rmdir: no such directory: nonExistentDir", output);
+        String actualOutput = outputStreamCaptor.toString().trim();
+        System.out.println("Captured output: " + actualOutput);
+
+        assertEquals("rmdir: no such directory: " + dirName, actualOutput, "Output mismatch");
     }
 
     @Test
-    public void testRemoveDirectoryNotEmpty() throws IOException {
-        // Create a directory and file inside it
-        File dir = new File(testDirectory, "notEmptyDir");
-        dir.mkdir();
-        new File(dir, "file.txt").createNewFile();
+    public void testRemoveNonEmptyDirectory() throws IOException {
+        String dirName = tempDir.resolve("nonEmptyDir").toString();
+        new File(dirName).mkdir();  // Create the directory to be removed
+        new File(dirName, "file.txt").createNewFile();  // Create a file inside the directory
 
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        System.setOut(new PrintStream(outputStream));
+        rmdirCommand.execute(new String[]{dirName});
 
-        rmdirCommand.execute(new String[]{"notEmptyDir"});
+        String actualOutput = outputStreamCaptor.toString().trim();
+        System.out.println("Captured output: " + actualOutput);
 
-        // Verify the output message
-        String output = outputStream.toString().trim();
-        assertEquals("rmdir: directory not empty or cannot be removed: notEmptyDir", output);
+        assertTrue(new File(dirName).exists(), "Directory should not be removed");
+        assertEquals("rmdir: directory not empty or cannot be removed: " + dirName, actualOutput, "Output mismatch");
+    }
+
+    @Test
+    public void testMissingArgument() {
+        rmdirCommand.execute(new String[]{});
+
+        String actualOutput = outputStreamCaptor.toString().trim();
+        System.out.println("Captured output: " + actualOutput);
+
+        assertEquals("rmdir: missing argument", actualOutput, "Output mismatch");
     }
 }
